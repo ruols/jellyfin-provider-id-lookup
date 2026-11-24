@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using Jellyfin.Api.Constants;
 using Jellyfin.Api.Controllers;
 using Jellyfin.Api.Extensions;
@@ -11,14 +10,12 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Plugin.ProviderIdLookup;
 
 public sealed class ProviderIdLookupFilter(
     ILibraryManager libraryManager,
-    IUserManager userManager,
-    ILogger<ProviderIdLookupFilter> logger) : IAsyncActionFilter
+    IUserManager userManager) : IAsyncActionFilter
 {
     public const int MaxCandidates = 4096;
 
@@ -33,10 +30,6 @@ public sealed class ProviderIdLookupFilter(
             await next().ConfigureAwait(false);
             return;
         }
-
-        context.HttpContext.Items[RequestTraceStartupFilter.LookupEntered] = true;
-        var traceId = context.HttpContext.TraceIdentifier;
-        logger.LogInformation("Provider ID trace {TraceId} entered lookup filter", traceId);
 
         // MVC authorization runs before action filters; also fail closed in direct invocations.
         if (context.HttpContext.User.Identity?.IsAuthenticated != true)
@@ -131,23 +124,9 @@ public sealed class ProviderIdLookupFilter(
         }
 
         context.HttpContext.RequestAborted.ThrowIfCancellationRequested();
-        var started = Stopwatch.GetTimestamp();
-        IReadOnlyList<Guid> candidates;
-        try
-        {
-            candidates = libraryManager.GetItemIds(query);
-        }
-        catch (Exception error) when (error is not OperationCanceledException)
-        {
-            logger.LogWarning("Provider ID trace {TraceId} lookup failed during candidate query ({ErrorType}) after {ElapsedMs:F1} ms",
-                traceId, error.GetType().Name, Stopwatch.GetElapsedTime(started).TotalMilliseconds);
-            throw;
-        }
-
-        var lookupMs = Stopwatch.GetElapsedTime(started).TotalMilliseconds;
+        var candidates = libraryManager.GetItemIds(query);
         if (candidates.Count > MaxCandidates)
         {
-            LogOutcome(traceId, "candidate limit exceeded", lookupMs, 0, 0);
             context.Result = new UnprocessableEntityObjectResult("Provider lookup matched too many items; use more specific provider IDs.");
             return;
         }
@@ -156,7 +135,6 @@ public sealed class ProviderIdLookupFilter(
             allowed.IntersectWith(originalIds);
         if (allowed.Count == 0)
         {
-            LogOutcome(traceId, "no candidates", lookupMs, 0, 0);
             // Empty Ids means NO FILTER to Jellyfin. Never forward an empty match to the action.
             context.Result = Empty(context);
             return;
@@ -164,14 +142,9 @@ public sealed class ProviderIdLookupFilter(
         context.ActionArguments["ids"] = originalIds.Length > 0
             ? originalIds.Where(allowed.Contains).Distinct().ToArray()
             : allowed.ToArray();
-        var nativeStarted = Stopwatch.GetTimestamp();
         var executed = await next().ConfigureAwait(false);
-        var nativeMs = Stopwatch.GetElapsedTime(nativeStarted).TotalMilliseconds;
         if (executed.Exception is not null)
-        {
-            LogOutcome(traceId, "native action failed", lookupMs, nativeMs, 0);
             return;
-        }
         // Defense against native query changes or another filter broadening the result.
         var payload = executed.Result switch
         {
@@ -183,29 +156,14 @@ public sealed class ProviderIdLookupFilter(
         {
             if (resultData.Items.Any(item => !allowed.Contains(item.Id)))
             {
-                logger.LogError("Provider ID lookup returned an item outside the candidate set; response blocked.");
                 executed.Result = new StatusCodeResult(StatusCodes.Status502BadGateway);
-                LogOutcome(traceId, "response blocked", lookupMs, nativeMs, 0);
-                return;
             }
-            LogOutcome(traceId, resultData.Items.Count == 0 ? "empty page" : "matched", lookupMs, nativeMs, resultData.Items.Count);
         }
         else if (executed.Result is ObjectResult { StatusCode: null or >= 200 and < 300 })
         {
-            logger.LogError("Provider ID lookup received an unexpected successful response type; response blocked.");
             executed.Result = new StatusCodeResult(StatusCodes.Status502BadGateway);
-            LogOutcome(traceId, "response blocked", lookupMs, nativeMs, 0);
-        }
-        else
-        {
-            LogOutcome(traceId, "native action returned no item payload", lookupMs, nativeMs, 0);
         }
     }
-
-    private void LogOutcome(string traceId, string outcome, double lookupMs, double nativeMs, int returned) =>
-        logger.LogInformation(
-            "Provider ID lookup: {Outcome} [trace {TraceId}]; returned {Returned}; candidate query {LookupMs:F1} ms; native Items action {NativeMs:F1} ms",
-            outcome, traceId, returned, lookupMs, nativeMs);
 
     private static T? Argument<T>(ActionExecutingContext context, string name) =>
         context.ActionArguments.TryGetValue(name, out var value) && value is T typed ? typed : default;

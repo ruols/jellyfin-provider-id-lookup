@@ -15,7 +15,6 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Moq;
 using Xunit;
@@ -29,7 +28,7 @@ public class FilterTests
     private readonly Guid userId = Guid.NewGuid();
     private int calls;
 
-    private ProviderIdLookupFilter Filter => new(library.Object, users.Object, NullLogger<ProviderIdLookupFilter>.Instance);
+    private ProviderIdLookupFilter Filter => new(library.Object, users.Object);
 
     private ActionExecutingContext Context(string? query = "Tmdb.1", string method = "GetItems", bool authenticated = true, bool apiKey = false)
     {
