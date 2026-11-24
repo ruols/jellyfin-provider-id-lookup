@@ -10,6 +10,15 @@ namespace ProviderIdLookup.Tests;
 public class TargetContractTests
 {
     [Fact]
+    public void PluginInfoCanBeReadImmediatelyAfterConstruction()
+    {
+        var plugin = new Plugin();
+        var info = plugin.GetPluginInfo();
+        Assert.Equal(plugin.Id, info.Id);
+        Assert.Equal(typeof(Plugin).Assembly.GetName().Version, plugin.Version);
+    }
+
+    [Fact]
     public void TargetIsActually122AndRequiredNativeApisExist()
     {
         Assert.Equal(new Version(12, 2, 0, 0), typeof(InternalItemsQuery).Assembly.GetName().Version);
