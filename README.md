@@ -1,6 +1,6 @@
 # Provider ID Lookup
 
-为现有 **Jellyfin 12.2.0 测试版 / .NET 10** 提供 Emby `AnyProviderIdEquals` 精确查询兼容。仓库保持私有；已发布可手动安装的 [0.1.0.0 实验版](https://github.com/ruols/jellyfin-provider-id-lookup/releases/tag/v0.1.0.0)，尚未在真实服务器验收。安装步骤见 [INSTALL.md](docs/INSTALL.md)。
+为 **Jellyfin 12.2.0 测试版 / .NET 10** 提供 Emby `AnyProviderIdEquals` 精确查询兼容。安装包见 [GitHub Releases](https://github.com/ruols/jellyfin-provider-id-lookup/releases)。
 
 ## 目标环境
 
@@ -72,22 +72,17 @@ GitHub Actions 的 **Build and test pinned Jellyfin target** 在 main push、PR 
 只有 [验收清单](docs/ACCEPTANCE.md) 中的权限、电影、电视剧及客户端测试均完成，才另行决定是否停用 Go 反代并切换端口。自动测试通过不等同于用户验收稳定。
 
 
-## manifest 与发布选择
+## Jellyfin 网页插件源
 
-根目录 `manifest.json` 是符合 Jellyfin 仓库结构的**未启用清单**，`versions: []`，没有虚构的下载地址或校验值。打包脚本另生成 `artifacts/manifest.json`，含实际 ZIP 的 MD5（Jellyfin 格式要求）、四段版本 `0.1.0.0`、`targetAbi: 12.2.0.0`、UTC 时间戳和预留的 Release 下载地址。该地址在真正发布对应资产前不可安装，文件生成不代表发布。
+在 Jellyfin 控制台的「插件 → 存储库」添加以下固定地址，之后可从插件目录选择版本：
 
-ABI 是最低版本门槛，并不能限制到某一测试镜像；不能因为更高版本服务器接受清单就假定二进制兼容。
+```text
+https://raw.githubusercontent.com/ruols/jellyfin-provider-id-lookup/main/manifest.json
+```
 
-可选方式：
+根目录清单收录此公开仓库已发布且具备可安装 ZIP 的版本，按版本号从新到旧排列。建议安装最新版。ABI 是最低版本门槛，不能替代对具体 Jellyfin 镜像的兼容验证。
 
-1. **私有源码 + 手动测试安装**（当前默认）：从本地或有权限的 Actions 下载候选 ZIP。
-2. **私有源码 + 单独公开分发仓库/自己的 HTTP 服务**：只公开 manifest 和 ZIP；Jellyfin 服务器必须可匿名下载二者。无需公开源码。
-3. **公开整个仓库 + 公开 Release**：之后使用 raw manifest URL 通过 Web 安装。更改仓库可见性需用户明确选择，本项目不会自动执行。
-
-
-**Prepare draft prerelease** 工作流只可手动运行：输入 `draft` 后先重新编译测试，再创建 **draft + prerelease** 并上传 ZIP、候选 manifest 和 SHA256SUMS。它不更新根清单、不公开仓库、不自动发布；不应在已存在相同 tag 的情况下覆盖资产。
-
-准备 Web 分发时，先选择公开分发位置，核实 ZIP 可匿名下载且校验一致，再将候选 manifest 的 URL 调整到真实地址，最后更新根清单并发布。正式可添加的仓库 URL 必须在这些步骤完成后才能确认。
+发布新的 Release 后，运行 `python3 scripts/sync_catalog.py`，检查生成的根清单并提交到 `main`。脚本核对每个发布 ZIP 的地址、内容和 MD5。Release 附带的单版本清单供打包与校验使用，客户端始终添加上面的固定地址。
 
 ## 参考与边界
 
