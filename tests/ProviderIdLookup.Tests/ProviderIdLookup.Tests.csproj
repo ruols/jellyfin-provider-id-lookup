@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" PrivateAssets="all" />
+    <PackageReference Include="Moq" Version="4.20.72" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.11" />
+    <ProjectReference Include="../../src/Jellyfin.Plugin.ProviderIdLookup/Jellyfin.Plugin.ProviderIdLookup.csproj" />
+    <!-- Runtime dependencies are from the exact server, never shipped in the plugin ZIP. -->
+    <Content Include="$(JellyfinReferenceDir)/*.dll"
+             Exclude="$(JellyfinReferenceDir)/System.*;$(JellyfinReferenceDir)/Microsoft.AspNetCore.*;$(JellyfinReferenceDir)/Microsoft.Extensions.*;$(JellyfinReferenceDir)/Microsoft.CSharp.dll;$(JellyfinReferenceDir)/netstandard.dll;$(JellyfinReferenceDir)/mscorlib.dll">
+      <Link>%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+</Project>

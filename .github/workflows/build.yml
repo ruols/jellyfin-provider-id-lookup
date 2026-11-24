@@ -1,0 +1,30 @@
+name: Build and test pinned Jellyfin target
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - name: Extract and verify exact target assemblies
+        run: python3 scripts/fetch_refs.py
+      - name: Compile and test
+        run: dotnet test tests/ProviderIdLookup.Tests -c Release --logger trx --results-directory TestResults
+      - name: Build candidate package and manifest
+        run: python3 scripts/package.py --repository "$GITHUB_REPOSITORY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: provider-id-lookup-candidate
+          path: |
+            artifacts/
+            TestResults/*.trx
+            refs/provenance.json
+          if-no-files-found: error

@@ -1,0 +1,9 @@
+{
+  "repository": "nyanmisaka/jellyfin",
+  "tag": "261006-amd64-testing",
+  "digest": "sha256:d2f219cd552aaf7df74846b80f99bdcd2e8f5679ead305ab06c920685a4193b8",
+  "serverLayer": "sha256:6fe37a28bc9207219f17635123602a9cff87fe6af885aadc526ec84a291bdc0c",
+  "serverVersion": "12.2.0.0",
+  "targetFramework": "net10.0",
+  "runtimeVersion": "10.0.12"
+}

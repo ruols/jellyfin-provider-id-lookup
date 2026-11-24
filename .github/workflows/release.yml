@@ -1,0 +1,32 @@
+name: Prepare draft prerelease
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_candidate:
+        description: 'Type draft to create a private draft release (not a Web repository publication)'
+        required: true
+permissions:
+  contents: read
+jobs:
+  candidate:
+    if: inputs.confirm_candidate == 'draft'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - run: python3 scripts/fetch_refs.py
+      - run: dotnet test tests/ProviderIdLookup.Tests -c Release --logger trx --results-directory TestResults
+      - run: python3 scripts/package.py --repository "$GITHUB_REPOSITORY"
+      - name: Create draft only after successful verification
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          version=$(python3 -c 'import json; print(json.load(open("artifacts/manifest.json"))[0]["versions"][0]["version"])')
+          gh release create "v$version" artifacts/ProviderIdLookup-*.zip artifacts/manifest.json artifacts/SHA256SUMS \
+            --target "$GITHUB_SHA" --draft --prerelease --title "Provider ID Lookup $version (experimental)" \
+            --notes-file docs/RELEASE_NOTES.md

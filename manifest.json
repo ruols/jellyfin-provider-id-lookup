@@ -1,0 +1,11 @@
+[
+  {
+    "guid": "ead7d651-c6a7-4d6d-9fe1-d32b7cc152c6",
+    "name": "Provider ID Lookup",
+    "description": "Native Emby AnyProviderIdEquals compatibility for nyanmisaka Jellyfin 12.2.0 testing. No independent index.",
+    "overview": "Native provider ID lookup compatibility (experimental)",
+    "owner": "ruols",
+    "category": "General",
+    "versions": []
+  }
+]
