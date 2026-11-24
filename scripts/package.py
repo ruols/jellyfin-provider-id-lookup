@@ -15,7 +15,7 @@ ASSEMBLY = "Jellyfin.Plugin.ProviderIdLookup"
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--repository", default="ruols/jellyfin-plugin-provider-id-lookup")
+    parser.add_argument("--repository", default="ruols/jellyfin-provider-id-lookup")
     parser.add_argument("--output", type=Path, default=ROOT / "artifacts")
     args = parser.parse_args()
     if not re.fullmatch(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+", args.repository):

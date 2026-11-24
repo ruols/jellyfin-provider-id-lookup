@@ -1,10 +1,10 @@
 # Provider ID Lookup
 
-为现有 **Jellyfin 12.2.0 测试版 / .NET 10** 提供 Emby `AnyProviderIdEquals` 精确查询兼容。仓库保持私有；已发布可手动安装的 [0.1.0.0 实验版](https://github.com/ruols/jellyfin-plugin-provider-id-lookup/releases/tag/v0.1.0.0)，尚未在真实服务器验收。安装步骤见 [INSTALL.md](docs/INSTALL.md)。
+为现有 **Jellyfin 12.2.0 测试版 / .NET 10** 提供 Emby `AnyProviderIdEquals` 精确查询兼容。仓库保持私有；已发布可手动安装的 [0.1.0.0 实验版](https://github.com/ruols/jellyfin-provider-id-lookup/releases/tag/v0.1.0.0)，尚未在真实服务器验收。安装步骤见 [INSTALL.md](docs/INSTALL.md)。
 
 ## 目标环境
 
-- GitHub 账号及仓库：`ruols/jellyfin-plugin-provider-id-lookup`。
+- GitHub 账号及仓库：`ruols/jellyfin-provider-id-lookup`。
 - 镜像：`nyanmisaka/jellyfin:261006-amd64-testing`，linux/amd64。
 - 固定镜像 digest：`sha256:d2f219cd552aaf7df74846b80f99bdcd2e8f5679ead305ab06c920685a4193b8`。
 - 主程序及 MediaBrowser.Controller 程序集版本：`12.2.0.0`（Jellyfin.Api 自身为 `1.0.0.0`，不能据此判断服务端版本）；运行配置：`net10.0`、Microsoft.NETCore.App / Microsoft.AspNetCore.App `10.0.12`。
@@ -71,7 +71,6 @@ GitHub Actions 的 **Build and test pinned Jellyfin target** 在 main push、PR 
 
 只有 [验收清单](docs/ACCEPTANCE.md) 中的权限、电影、电视剧及客户端测试均完成，才另行决定是否停用 Go 反代并切换端口。自动测试通过不等同于用户验收稳定。
 
-当前可安装版本由 [预发布工作流](https://github.com/ruols/jellyfin-plugin-provider-id-lookup/actions/runs/45369755769) 编译并通过 35 项测试后生成；随后按用户要求发布为私有仓库 Pre-release（非 Draft）。ZIP、manifest 和 SHA256SUMS 均已上传。根清单仍不启用匿名 Web 安装。
 
 ## manifest 与发布选择
 
@@ -85,7 +84,6 @@ ABI 是最低版本门槛，并不能限制到某一测试镜像；不能因为�
 2. **私有源码 + 单独公开分发仓库/自己的 HTTP 服务**：只公开 manifest 和 ZIP；Jellyfin 服务器必须可匿名下载二者。无需公开源码。
 3. **公开整个仓库 + 公开 Release**：之后使用 raw manifest URL 通过 Web 安装。更改仓库可见性需用户明确选择，本项目不会自动执行。
 
-私有 GitHub raw 文件、私有 Release 和 Draft Release 不能直接作为匿名 Jellyfin Web 安装源。不要把 GitHub PAT 嵌入 URL、README 或清单。
 
 **Prepare draft prerelease** 工作流只可手动运行：输入 `draft` 后先重新编译测试，再创建 **draft + prerelease** 并上传 ZIP、候选 manifest 和 SHA256SUMS。它不更新根清单、不公开仓库、不自动发布；不应在已存在相同 tag 的情况下覆盖资产。
 

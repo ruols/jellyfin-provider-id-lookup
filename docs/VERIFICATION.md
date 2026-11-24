@@ -55,12 +55,3 @@ f31a79e6a5b3728cea5b503c6f0ad963049a909e6ee467e0e0e9167545652c4e  Jellyfin.Api.d
 未安装到用户 Jellyfin；未重启服务器；未验证生产影库访问控制、真实电影电视剧/季集数据、虚拟视图、EPlayerX 聚合、播放或性能。仓库保持私有，未激活匿名 Web 安装清单。没有停用或修改 Go 反代。
 
 发布或切换入口前按 [ACCEPTANCE.md](ACCEPTANCE.md) 验收。构建成功与自动测试通过，不等于设备或服务器验收稳定。
-
-## GitHub 构建与可安装版本
-
-- [Ubuntu 构建运行](https://github.com/ruols/jellyfin-plugin-provider-id-lookup/actions/runs/45369469252)：编译、35 项测试、打包与上传均成功。
-- [预发布工作流](https://github.com/ruols/jellyfin-plugin-provider-id-lookup/actions/runs/45369755769)：再次按发布流程验证目标 DLL、编译测试并创建带三个附件的草稿，全部成功。
-- 用户追加“提供可安装版本”后，于 2026-11-24 17:56:49（Asia/Shanghai）将草稿发布为 [v0.1.0.0 Pre-release](https://github.com/ruols/jellyfin-plugin-provider-id-lookup/releases/tag/v0.1.0.0)。API 已确认 `draft=false`、`prerelease=true`；源码提交为 `c5bcc1447049d1eabf82588ef9d1d5dc5d4df94c`。这是测试发行标记，不代表用户确认稳定。
-- 发布 ZIP 为 9296 字节，GitHub 记录 SHA-256：`c9f1938f5fe20ba3ce225e82b864bd5dd5c5d3cf4c39fa5e9076ec99ad1a36fa`。另附实际 ZIP 对应的 manifest 与 SHA256SUMS，三个附件均为 uploaded。
-- 本地候选与 GitHub 构建的 DLL 因构建路径等条件可有不同校验值；安装时以同一 Release 附带的校验文件为准，不混用候选文件与发布清单。
-- 私有仓库匿名下载不可用，不能直接把 Release 或 raw URL 当作 Jellyfin Web 安装源。若需 Web 安装，先选择公开分发方式。
