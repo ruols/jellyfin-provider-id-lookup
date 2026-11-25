@@ -82,7 +82,7 @@ https://raw.githubusercontent.com/ruols/jellyfin-provider-id-lookup/main/manifes
 
 根目录清单收录此公开仓库已发布且具备可安装 ZIP 的版本，按版本号从新到旧排列。建议安装最新版。ABI 是最低版本门槛，不能替代对具体 Jellyfin 镜像的兼容验证。
 
-发布新的 Release 后，运行 `python3 scripts/sync_catalog.py`，检查生成的根清单并提交到 `main`。脚本核对每个发布 ZIP 的地址、内容和 MD5。Release 附带的单版本清单供打包与校验使用，客户端始终添加上面的固定地址。
+Release 发布（含预发布）后，GitHub Actions 的 **Update Jellyfin plugin catalog** 会核对公开 ZIP 的地址、内容和 MD5，再提交更新后的根清单。准备草稿后，在 GitHub Releases 点击 Publish 即可触发。也可以从 Actions 手动运行该工作流。若未来使用工作流内置的 `GITHUB_TOKEN` 直接发布 Release，GitHub 不会因此触发独立工作流，请手动运行目录更新。客户端始终使用上面的固定地址。
 
 ## 参考与边界
 
